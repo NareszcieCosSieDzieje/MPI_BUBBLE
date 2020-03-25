@@ -60,6 +60,7 @@ int main(int argc, char **argv)
             } else {
                 MPI_Send(&(tablica[i]), 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
             }
+            //printf("Rank %d | Max = %d\n", rank, max);
         }
         /**/
         /* Zawiadamiamy, że więcej liczb do wysyłania nie będzie*/
@@ -69,7 +70,7 @@ int main(int argc, char **argv)
         /* Tutaj wstaw odbieranie posortowanych liczb */
         sorted[0] = max;
         for (i=1;i<size;i++) {
-             MPI_Recv( &(sorted[i]), 1 , MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD, &status); //TODO: jaki tag!
+             MPI_Recv( &(sorted[i]), 1 , MPI_INT, i, END, MPI_COMM_WORLD, &status); //TODO: jaki tag!
         }
 
         /* Wyświetlanie posortowanej tablicy */
@@ -80,16 +81,29 @@ int main(int argc, char **argv)
 
     } else { //Ani wierzchołek, ani liść
         while (!end) {
+            int tag = 0;
             MPI_Recv(&tmp, 1, MPI_INT, rank-1, MPI_ANY_TAG,  \
                     MPI_COMM_WORLD, &status);
+            printf("Rank %d | Tmp = %d\n", rank, tmp);
             if (status.MPI_TAG==END) {
+                MPI_Send(&max, 1, MPI_INT, 0, END, MPI_COMM_WORLD);
+                if(rank < 19) {
+                    MPI_Send(&tmp, 1, MPI_INT, rank + 1, END, MPI_COMM_WORLD);
+                }
                 end=1;
-                //coś jeszcze?
             } else {
-                //sortowanie babelkowe
+                if(rank < (TABSIZE-1)){
+                    if( tmp > max){
+                        MPI_Send(&max, 1, MPI_INT, rank + 1, tag, MPI_COMM_WORLD);
+                        max = tmp;
+                    } else {
+                        MPI_Send(&tmp, 1, MPI_INT, rank + 1, tag, MPI_COMM_WORLD);
+                    }
+                } else {
+                    max = tmp;
+                }
             }
         }
     }
-
     MPI_Finalize();
 }
