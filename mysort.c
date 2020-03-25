@@ -2,6 +2,8 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <values.h>
+
 #define SORT 1
 #define END 2
 // jeżeli zerowy nie będzie uczestniczył w sortowaniu
@@ -17,7 +19,7 @@ int main(int argc, char **argv)
     int size,rank;
     int tablica[TABSIZE]={0};
     int sorted[TABSIZE]={-1};
-    int max=-1;
+    int max=INT_MIN;
     int tmp=-1;
     int i;
     int end=0;
